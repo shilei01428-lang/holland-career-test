@@ -61,10 +61,14 @@
             <!-- 二维码区域 -->
             <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">手机扫码参与测评</h3>
+                <div id="ip-selector" class="mb-4 hidden">
+                    <p class="text-xs text-gray-500 mb-2">请选择网络（多网卡环境）：</p>
+                    <div id="ip-buttons" class="flex flex-wrap justify-center gap-2"></div>
+                </div>
                 <div class="flex justify-center mb-4">
                     <div id="qrcode" class="p-2 border-2 border-gray-200 rounded-lg"></div>
                 </div>
-                <p class="text-sm text-gray-500">扫描二维码，在手机上完成测试</p>
+                <p id="qr-url" class="text-sm text-gray-500"></p>
             </div>
         </div>
 
@@ -257,19 +261,54 @@
         let currentQuestion = 0;
         let scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
         let chartInstance = null;
+        let currentQrUrl = window.lanUrl || window.location.href;
 
         // 生成二维码
-        function generateQR() {
+        function generateQR(url) {
             const qrDiv = document.getElementById("qrcode");
             qrDiv.innerHTML = "";
+            const targetUrl = url || currentQrUrl;
             new QRCode(qrDiv, {
-                text: window.location.href,
+                text: targetUrl,
                 width: 160,
                 height: 160,
                 colorDark: "#4B5563",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.M
             });
+            document.getElementById("qr-url").textContent = targetUrl;
+            currentQrUrl = targetUrl;
+        }
+
+        // 初始化IP选择器
+        function initIpSelector() {
+            const ips = window.lanIps;
+            if (!ips || ips.length === 0) return;
+
+            const selector = document.getElementById("ip-selector");
+            const buttons = document.getElementById("ip-buttons");
+            selector.classList.remove("hidden");
+
+            ips.forEach((item, index) => {
+                const btn = document.createElement("button");
+                btn.className = "px-3 py-1 text-xs rounded-full border transition-all " +
+                    (index === 0 ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-600 border-gray-300 hover:border-blue-400");
+                btn.textContent = item.name + " (" + item.ip + ")";
+                btn.onclick = () => {
+                    // reset styles
+                    buttons.querySelectorAll("button").forEach(b => {
+                        b.className = "px-3 py-1 text-xs rounded-full border bg-white text-gray-600 border-gray-300 hover:border-blue-400 transition-all";
+                    });
+                    btn.className = "px-3 py-1 text-xs rounded-full border bg-blue-600 text-white border-blue-600 transition-all";
+                    generateQR("http://" + item.ip + ":8080/index.html");
+                };
+                buttons.appendChild(btn);
+            });
+
+            // default to first IP
+            if (ips.length > 0) {
+                generateQR("http://" + ips[0].ip + ":8080/index.html");
+            }
         }
 
         function startTest() {
@@ -420,11 +459,10 @@
             document.getElementById("test-page").classList.add("hidden");
             document.getElementById("result-page").classList.add("hidden");
             document.getElementById("home-page").classList.remove("hidden");
-            generateQR();
         }
 
         // 初始化
-        generateQR();
+        initIpSelector();
     </script>
 </body>
 </html>
