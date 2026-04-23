@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>霍兰德职业兴趣测评</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        body { font-family: 'Noto Sans SC', sans-serif; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .option-card { transition: all 0.2s; }
+        .option-card:hover { transform: translateX(5px); }
+        .option-card.selected { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-color: transparent; }
+        .progress-bar { transition: width 0.3s ease; }
+        .type-badge { transition: all 0.3s; }
+        .type-badge:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+    <div class="max-w-2xl mx-auto px-4 py-8">
+
+        <!-- 首页 -->
+        <div id="home-page" class="fade-in">
+            <div class="text-center mb-10">
+                <div class="inline-block p-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 mb-4">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-4xl font-bold text-gray-800 mb-3">霍兰德职业兴趣测评</h1>
+                <p class="text-gray-600 text-lg">基于 RIASEC 模型，发现最适合你的职业方向</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">测评简介</h2>
+                <p class="text-gray-600 mb-4 leading-relaxed">
+                    霍兰德职业兴趣理论将人的职业兴趣分为六种类型：<span class="font-medium text-blue-600">现实型(R)</span>、<span class="font-medium text-purple-600">研究型(I)</span>、<span class="font-medium text-pink-600">艺术型(A)</span>、<span class="font-medium text-green-600">社会型(S)</span>、<span class="font-medium text-orange-600">企业型(E)</span>、<span class="font-medium text-teal-600">常规型(C)</span>。
+                </p>
+                <p class="text-gray-600 mb-6 leading-relaxed">
+                    本测评共 60 题，大约需要 10-15 分钟完成。请根据你的真实想法回答，没有对错之分。
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                    <div class="bg-blue-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">🔧</div><div class="text-sm font-medium text-blue-700">现实型 R</div></div>
+                    <div class="bg-purple-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">🔬</div><div class="text-sm font-medium text-purple-700">研究型 I</div></div>
+                    <div class="bg-pink-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">🎨</div><div class="text-sm font-medium text-pink-700">艺术型 A</div></div>
+                    <div class="bg-green-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">🤝</div><div class="text-sm font-medium text-green-700">社会型 S</div></div>
+                    <div class="bg-orange-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">📢</div><div class="text-sm font-medium text-orange-700">企业型 E</div></div>
+                    <div class="bg-teal-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">📋</div><div class="text-sm font-medium text-teal-700">常规型 C</div></div>
+                </div>
+
+                <button onclick="startTest()" class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold text-lg hover:shadow-lg transition-all hover:scale-[1.02]">
+                    开始测评
+                </button>
+            </div>
+
+            <!-- 二维码区域 -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">手机扫码参与测评</h3>
+                <div id="ip-selector" class="mb-4 hidden">
+                    <p class="text-xs text-gray-500 mb-2">请选择网络（多网卡环境）：</p>
+                    <div id="ip-buttons" class="flex flex-wrap justify-center gap-2"></div>
+                </div>
+                <div class="flex justify-center mb-4">
+                    <div id="qrcode" class="p-2 border-2 border-gray-200 rounded-lg"></div>
+                </div>
+                <p id="qr-url" class="text-sm text-gray-500"></p>
+            </div>
+        </div>
+
+        <!-- 测试页 -->
+        <div id="test-page" class="hidden fade-in">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="goHome()" class="text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        返回
+                    </button>
+                    <span class="text-sm text-gray-500">第 <span id="current-num">1</span> / <span id="total-num">60</span> 题</span>
+                </div>
+
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-8">
+                    <div id="progress-bar" class="progress-bar bg-gradient-to-r from-blue-500 to-purple-600 h-2.5 rounded-full" style="width: 1%"></div>
+                </div>
+
+                <h2 id="question-text" class="text-xl font-semibold text-gray-800 mb-8 leading-relaxed"></h2>
+
+                <div class="space-y-3">
+                    <button onclick="answer(2)" class="option-card w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-400 bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold text-sm">是</div>
+                            <span class="text-gray-700">符合我的情况</span>
+                        </div>
+                    </button>
+                    <button onclick="answer(1)" class="option-card w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-400 bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center font-bold text-sm">中</div>
+                            <span class="text-gray-700">一般 / 不确定</span>
+                        </div>
+                    </button>
+                    <button onclick="answer(0)" class="option-card w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-400 bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-sm">否</div>
+                            <span class="text-gray-700">不符合我的情况</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 结果页 -->
+        <div id="result-page" class="hidden fade-in">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">测评结果</h1>
+                <p class="text-gray-600">你的霍兰德职业兴趣代码</p>
+            </div>
+
+            <!-- 类型代码 -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6 text-center">
+                <div id="holland-code" class="text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"></div>
+                <div id="type-names" class="text-lg text-gray-700 mb-6"></div>
+                <div id="type-description" class="text-gray-600 leading-relaxed"></div>
+            </div>
+
+            <!-- 雷达图 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                <canvas id="radarChart"></canvas>
+            </div>
+
+            <!-- 各维度得分 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">各维度得分</h3>
+                <div id="scores-detail" class="space-y-3"></div>
+            </div>
+
+            <!-- 职业推荐 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">推荐职业方向</h3>
+                <div id="career-suggestions" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="restartTest()" class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                    重新测评
+                </button>
+                <button onclick="goHome()" class="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:border-gray-400 transition-all">
+                    返回首页
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 霍兰德测试题目
+        const questions = [
+            // R 现实型 (1-10)
+            { text: "我喜欢动手操作工具、机械或设备", type: "R" },
+            { text: "我喜欢户外活动，如园艺、木工或修理", type: "R" },
+            { text: "我喜欢修理家电、自行车或其他物品", type: "R" },
+            { text: "我喜欢运动或需要体能的活动", type: "R" },
+            { text: "我对汽车、飞机等交通工具的原理感兴趣", type: "R" },
+            { text: "我喜欢建筑、施工或制作模型", type: "R" },
+            { text: "我宁愿在户外工作，也不愿坐在办公室", type: "R" },
+            { text: "我喜欢看机械原理图或工程图纸", type: "R" },
+            { text: "我喜欢使用锤子、螺丝刀等手工工具", type: "R" },
+            { text: "我认为自己手脚灵活，擅长具体操作", type: "R" },
+            // I 研究型 (11-20)
+            { text: "我喜欢探索事物的原理和科学规律", type: "I" },
+            { text: "我喜欢做科学实验或研究", type: "I" },
+            { text: "我喜欢解决复杂的数学或逻辑问题", type: "I" },
+            { text: "我喜欢阅读科学、科普类书籍", type: "I" },
+            { text: "我喜欢观察和研究自然现象", type: "I" },
+            { text: "我喜欢分析和解释数据", type: "I" },
+            { text: "我喜欢独立思考和深入研究问题", type: "I" },
+            { text: "我对医学、生物学或化学感兴趣", type: "I" },
+            { text: "我喜欢学习新理论和抽象概念", type: "I" },
+            { text: "我喜欢使用计算机进行编程或数据分析", type: "I" },
+            // A 艺术型 (21-30)
+            { text: "我喜欢绘画、设计或视觉创作", type: "A" },
+            { text: "我喜欢写作、讲故事或诗歌创作", type: "A" },
+            { text: "我喜欢音乐、表演或舞蹈", type: "A" },
+            { text: "我喜欢有创意、不拘一格的工作", type: "A" },
+            { text: "我喜欢自由表达自己的想法和感受", type: "A" },
+            { text: "我喜欢欣赏艺术作品、电影或戏剧", type: "A" },
+            { text: "我不喜欢重复性、缺乏变化的工作", type: "A" },
+            { text: "我喜欢用自己的方式做事，不拘泥于规则", type: "A" },
+            { text: "我对时尚、摄影或室内设计感兴趣", type: "A" },
+            { text: "我认为自己有想象力和艺术天赋", type: "A" },
+            // S 社会型 (31-40)
+            { text: "我喜欢帮助他人解决问题", type: "S" },
+            { text: "我喜欢教导、培训或辅导别人", type: "S" },
+            { text: "我喜欢与人合作，而不是独自工作", type: "S" },
+            { text: "我对心理咨询或社会工作感兴趣", type: "S" },
+            { text: "我喜欢参与社区服务或志愿活动", type: "S" },
+            { text: "我善于倾听并理解他人的感受", type: "S" },
+            { text: "我喜欢照顾病人、儿童或老人", type: "S" },
+            { text: "我喜欢在团队中发挥协调作用", type: "S" },
+            { text: "我认为自己有耐心和同理心", type: "S" },
+            { text: "我喜欢与人打交道，而不是与物打交道", type: "S" },
+            // E 企业型 (41-50)
+            { text: "我喜欢领导和组织团队活动", type: "E" },
+            { text: "我喜欢说服他人接受我的观点", type: "E" },
+            { text: "我喜欢有挑战性的商业目标", type: "E" },
+            { text: "我喜欢竞争，渴望获得成功", type: "E" },
+            { text: "我对创业、管理或经营感兴趣", type: "E" },
+            { text: "我喜欢发起新项目或新计划", type: "E" },
+            { text: "我喜欢在公众面前演讲或主持", type: "E" },
+            { text: "我愿意承担风险以获取更大回报", type: "E" },
+            { text: "我喜欢做决策并承担责任", type: "E" },
+            { text: "我有成为领导者或管理者的志向", type: "E" },
+            // C 常规型 (51-60)
+            { text: "我喜欢有条理、井然有序的工作", type: "C" },
+            { text: "我喜欢处理数据、整理文件和记录", type: "C" },
+            { text: "我喜欢按照既定流程和标准做事", type: "C" },
+            { text: "我喜欢记录详细信息并归档保存", type: "C" },
+            { text: "我注重精确性，不喜欢出错", type: "C" },
+            { text: "我喜欢在办公室环境中工作", type: "C" },
+            { text: "我擅长使用办公软件处理文档", type: "C" },
+            { text: "我喜欢数字、统计和财务工作", type: "C" },
+            { text: "我认为守时、守信非常重要", type: "C" },
+            { text: "我喜欢有明确规则和制度的环境", type: "C" }
+        ];
+
+        // 类型信息
+        const typeInfo = {
+            R: { name: "现实型", color: "#3B82F6", emoji: "🔧", desc: "动手能力强，喜欢具体的任务和户外活动，务实、稳重。" },
+            I: { name: "研究型", color: "#8B5CF6", emoji: "🔬", desc: "善于思考分析，喜欢探索和理解事物，理性、好奇。" },
+            A: { name: "艺术型", color: "#EC4899", emoji: "🎨", desc: "富有创造力和想象力，喜欢自由表达，感性、独特。" },
+            S: { name: "社会型", color: "#10B981", emoji: "🤝", desc: "乐于助人，善于沟通合作，有同理心、耐心。" },
+            E: { name: "企业型", color: "#F97316", emoji: "📢", desc: "有领导力和说服力，追求成就，自信、果断。" },
+            C: { name: "常规型", color: "#14B8A6", emoji: "📋", desc: "细致认真，喜欢条理和规范，可靠、精确。" }
+        };
+
+        // 职业推荐数据库
+        const careerDB = {
+            "R": ["机械工程师", "电工技师", "建筑工人", "汽车维修师", "飞行员", "厨师", "园艺师", "体育教练", "测绘员", "数控技师"],
+            "I": ["科学家", "医生", "数据分析师", "软件工程师", "药剂师", "心理学家", "研究员", "统计学家", "生物学家", "大学教授"],
+            "A": ["平面设计师", "作家", "音乐家", "摄影师", "演员", "室内设计师", "画家", "导演", "时尚设计师", "编辑"],
+            "S": ["教师", "护士", "社工", "心理咨询师", "人力资源专员", "导游", "客服经理", "牧师/ Rabbi", "理疗师", "营养师"],
+            "E": ["企业家", "销售经理", "律师", "政治家", "市场总监", "项目经理", "投资顾问", "公关经理", "零售经理", "制片人"],
+            "C": ["会计师", "审计师", "行政助理", "银行职员", "税务专员", "档案管理员", "预算分析师", "保险核保员", "出纳", "质量控制员"]
+        };
+
+        // 组合职业推荐
+        const comboCareers = {
+            "RI": ["工程师", "技术顾问", "法医"], "RA": ["景观设计师", "工业设计", "食品造型师"],
+            "RS": ["体育教练", "健身教练", "康复治疗师"], "RE": ["建筑承包商", "设备销售", "技术主管"],
+            "RC": ["技术文档撰写", "质检员", "CAD绘图员"], "IA": ["科学插画师", "医学插画", "科普作家"],
+            "IS": ["医学研究员", "临床心理", "营养师"], "IE": ["技术创业", "医药代表", "知识产权律师"],
+            "IC": ["数据科学家", "精算师", "实验室管理"], "AS": ["艺术治疗师", "音乐治疗师", "社工艺术家"],
+            "AE": ["创意总监", "品牌策划", "活动策划"], "AC": ["平面设计", "排版设计", "展览设计"],
+            "SE": ["人力资源总监", "教育管理者", "非营利组织主管"], "SC": ["学校行政", "医疗行政", "社会服务管理"],
+            "EC": ["财务经理", "运营总监", "行政管理"]
+        };
+
+        let currentQuestion = 0;
+        let scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+        let chartInstance = null;
+        let currentQrUrl = window.lanUrl || window.location.href;
+
+        // 生成二维码
+        function generateQR(url) {
+            const qrDiv = document.getElementById("qrcode");
+            qrDiv.innerHTML = "";
+            const targetUrl = url || currentQrUrl;
+            new QRCode(qrDiv, {
+                text: targetUrl,
+                width: 160,
+                height: 160,
+                colorDark: "#4B5563",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+            document.getElementById("qr-url").textContent = targetUrl;
+            currentQrUrl = targetUrl;
+        }
+
+        // 初始化IP选择器
+        function initIpSelector() {
+            const ips = window.lanIps;
+            if (!ips || ips.length === 0) return;
+
+            const selector = document.getElementById("ip-selector");
+            const buttons = document.getElementById("ip-buttons");
+            selector.classList.remove("hidden");
+
+            ips.forEach((item, index) => {
+                const btn = document.createElement("button");
+                btn.className = "px-3 py-1 text-xs rounded-full border transition-all " +
+                    (index === 0 ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-600 border-gray-300 hover:border-blue-400");
+                btn.textContent = item.name + " (" + item.ip + ")";
+                btn.onclick = () => {
+                    // reset styles
+                    buttons.querySelectorAll("button").forEach(b => {
+                        b.className = "px-3 py-1 text-xs rounded-full border bg-white text-gray-600 border-gray-300 hover:border-blue-400 transition-all";
+                    });
+                    btn.className = "px-3 py-1 text-xs rounded-full border bg-blue-600 text-white border-blue-600 transition-all";
+                    generateQR("http://" + item.ip + ":8080/index.html");
+                };
+                buttons.appendChild(btn);
+            });
+
+            // default to first IP
+            if (ips.length > 0) {
+                generateQR("http://" + ips[0].ip + ":8080/index.html");
+            }
+        }
+
+        function startTest() {
+            currentQuestion = 0;
+            scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+            document.getElementById("home-page").classList.add("hidden");
+            document.getElementById("result-page").classList.add("hidden");
+            document.getElementById("test-page").classList.remove("hidden");
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById("question-text").textContent = q.text;
+            document.getElementById("current-num").textContent = currentQuestion + 1;
+            document.getElementById("total-num").textContent = questions.length;
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById("progress-bar").style.width = progress + "%";
+
+            // 清除选中状态
+            document.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
+        }
+
+        function answer(score) {
+            const q = questions[currentQuestion];
+            scores[q.type] += score;
+
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById("test-page").classList.add("hidden");
+            document.getElementById("result-page").classList.remove("hidden");
+
+            // 排序得分
+            const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            const top3 = sorted.slice(0, 3);
+            const code = top3.map(x => x[0]).join("");
+
+            document.getElementById("holland-code").textContent = code;
+            document.getElementById("type-names").textContent = top3.map(x => typeInfo[x[0]].emoji + " " + typeInfo[x[0]].name).join(" · ");
+
+            // 描述
+            let desc = "你的核心特质是" + typeInfo[top3[0][0]].name + "：" + typeInfo[top3[0][0]].desc;
+            if (top3[1][1] > 5) {
+                desc += "同时你也具备" + typeInfo[top3[1][0]].name + "的特质：" + typeInfo[top3[1][0]].desc;
+            }
+            document.getElementById("type-description").textContent = desc;
+
+            // 雷达图
+            const ctx = document.getElementById("radarChart").getContext("2d");
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: "radar",
+                data: {
+                    labels: ["R现实型", "I研究型", "A艺术型", "S社会型", "E企业型", "C常规型"],
+                    datasets: [{
+                        label: "得分",
+                        data: [scores.R, scores.I, scores.A, scores.S, scores.E, scores.C],
+                        backgroundColor: "rgba(102, 126, 234, 0.2)",
+                        borderColor: "rgba(102, 126, 234, 1)",
+                        pointBackgroundColor: "rgba(118, 75, 162, 1)",
+                        pointBorderColor: "#fff",
+                        pointHoverBackgroundColor: "#fff",
+                        pointHoverBorderColor: "rgba(118, 75, 162, 1)"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 20,
+                            ticks: { stepSize: 5 }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // 得分详情
+            const scoresDiv = document.getElementById("scores-detail");
+            scoresDiv.innerHTML = "";
+            sorted.forEach(([type, score]) => {
+                const pct = (score / 20) * 100;
+                scoresDiv.innerHTML += `
+                    <div class="flex items-center gap-3">
+                        <div class="w-20 font-medium text-gray-700">${typeInfo[type].emoji} ${typeInfo[type].name}</div>
+                        <div class="flex-1 bg-gray-200 rounded-full h-4 overflow-hidden">
+                            <div class="h-full rounded-full" style="width: ${pct}%; background-color: ${typeInfo[type].color}"></div>
+                        </div>
+                        <div class="w-10 text-right font-bold text-gray-700">${score}</div>
+                    </div>
+                `;
+            });
+
+            // 职业推荐
+            const careerDiv = document.getElementById("career-suggestions");
+            careerDiv.innerHTML = "";
+            let careers = [];
+
+            // 添加主导类型职业
+            careers.push(...careerDB[top3[0][0]].slice(0, 4));
+
+            // 添加组合职业
+            const comboKey1 = top3[0][0] + top3[1][0];
+            const comboKey2 = top3[1][0] + top3[0][0];
+            if (comboCareers[comboKey1]) careers.push(...comboCareers[comboKey1]);
+            if (comboCareers[comboKey2]) careers.push(...comboCareers[comboKey2]);
+
+            // 去重
+            careers = [...new Set(careers)];
+
+            careers.slice(0, 8).forEach(career => {
+                careerDiv.innerHTML += `
+                    <div class="type-badge bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 rounded-lg p-3 text-center font-medium text-gray-700">
+                        ${career}
+                    </div>
+                `;
+            });
+
+            // 如果没有组合职业，添加第二类型职业
+            if (careers.length < 6) {
+                careerDB[top3[1][0]].slice(0, 3).forEach(career => {
+                    if (!careers.includes(career)) {
+                        careerDiv.innerHTML += `
+                            <div class="type-badge bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 rounded-lg p-3 text-center font-medium text-gray-700">
+                                ${career}
+                            </div>
+                        `;
+                    }
+                });
+            }
+        }
+
+        function restartTest() {
+            startTest();
+        }
+
+        function goHome() {
+            document.getElementById("test-page").classList.add("hidden");
+            document.getElementById("result-page").classList.add("hidden");
+            document.getElementById("home-page").classList.remove("hidden");
+        }
+
+        // 初始化
+        initIpSelector();
+    </script>
+</body>
+</html>
