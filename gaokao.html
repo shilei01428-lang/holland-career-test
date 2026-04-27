@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高考志愿综合测评 - 找到最适合你的专业方向</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+        body { font-family: 'Noto Sans SC', sans-serif; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .option-card { transition: all 0.2s; }
+        .option-card:hover { transform: translateX(5px); }
+        .option-card.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        .option-card.selected .option-emoji { color: white; }
+        .option-card.selected .option-label { color: white; }
+        .progress-bar { transition: width 0.3s ease; }
+        .discipline-card { transition: all 0.3s; cursor: pointer; }
+        .discipline-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .major-item { transition: all 0.2s; }
+        .match-bar { transition: width 1s ease-out; }
+        .strategy-card { transition: all 0.3s; }
+        .strategy-card:hover { transform: translateY(-3px); }
+        .spinner {
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-left-color: #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+
+        <!-- ========== 欢迎页 ========== -->
+        <div id="welcome-page" class="fade-in">
+            <div class="text-center mb-10">
+                <div class="inline-block p-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 mb-4">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0v9"/>
+                    </svg>
+                </div>
+                <h1 class="text-4xl font-bold text-gray-800 mb-3">高考志愿综合测评</h1>
+                <p class="text-gray-600 text-lg">整合6大职业人格测评，为你精准定位最适合的大学专业</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">测评内容</h2>
+                <p class="text-gray-600 mb-6 leading-relaxed">
+                    本测评融合霍兰德职业兴趣、职业锚、盖洛普优势、DISC行为风格、MBTI人格类型、4D领导力六大测评体系，共60题，约需15-20分钟。
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                    <div class="bg-blue-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">🔧</div><div class="text-sm font-medium text-blue-700">职业兴趣</div><div class="text-xs text-blue-500">20题</div></div>
+                    <div class="bg-purple-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">⚓</div><div class="text-sm font-medium text-purple-700">职业锚</div><div class="text-xs text-purple-500">8题</div></div>
+                    <div class="bg-pink-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">💎</div><div class="text-sm font-medium text-pink-700">天赋优势</div><div class="text-xs text-pink-500">8题</div></div>
+                    <div class="bg-green-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">🎯</div><div class="text-sm font-medium text-green-700">行为风格</div><div class="text-xs text-green-500">8题</div></div>
+                    <div class="bg-orange-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">🧠</div><div class="text-sm font-medium text-orange-700">人格类型</div><div class="text-xs text-orange-500">8题</div></div>
+                    <div class="bg-teal-50 rounded-lg p-3 text-center"><div class="text-2xl mb-1">🌟</div><div class="text-sm font-medium text-teal-700">领导潜力</div><div class="text-xs text-teal-500">8题</div></div>
+                </div>
+
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-6">
+                    <h3 class="font-semibold text-gray-800 mb-2">你将获得</h3>
+                    <ul class="text-gray-600 text-sm space-y-1">
+                        <li>✅ 六维度综合画像与雷达图分析</li>
+                        <li>✅ 3-5个最适合的学科门类推荐</li>
+                        <li>✅ 每个学科下2-3个具体专业详解</li>
+                        <li>✅ 基于你高考分数的冲·稳·保填报策略</li>
+                    </ul>
+                </div>
+
+                <button onclick="goToInfo()" class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold text-lg hover:shadow-lg transition-all hover:scale-[1.02]">
+                    开始测评
+                </button>
+            </div>
+
+            <!-- 二维码区域 -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">手机扫码参与测评</h3>
+                <div id="ip-selector" class="mb-4 hidden">
+                    <p class="text-xs text-gray-500 mb-2">请选择网络（多网卡环境）：</p>
+                    <div id="ip-buttons" class="flex flex-wrap justify-center gap-2"></div>
+                </div>
+                <div class="flex justify-center mb-4">
+                    <div id="qrcode" class="p-2 border-2 border-gray-200 rounded-lg"></div>
+                </div>
+                <p id="qr-url" class="text-sm text-gray-500"></p>
+            </div>
+        </div>
+
+        <!-- ========== 信息页 ========== -->
+        <div id="info-page" class="hidden fade-in">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="goToWelcome()" class="text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        返回
+                    </button>
+                    <span class="text-sm text-gray-400">1 / 3</span>
+                </div>
+
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">填写基本信息</h2>
+                <p class="text-gray-500 text-sm mb-6">这些信息将用于生成个性化的冲稳保填报策略</p>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">所在省份</label>
+                        <select id="province" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all">
+                            <option value="">请选择省份</option>
+                            <option value="beijing">北京</option><option value="tianjin">天津</option><option value="hebei">河北</option>
+                            <option value="shanxi">山西</option><option value="neimenggu">内蒙古</option><option value="liaoning">辽宁</option>
+                            <option value="jilin">吉林</option><option value="heilongjiang">黑龙江</option><option value="shanghai">上海</option>
+                            <option value="jiangsu">江苏</option><option value="zhejiang">浙江</option><option value="anhui">安徽</option>
+                            <option value="fujian">福建</option><option value="jiangxi">江西</option><option value="shandong">山东</option>
+                            <option value="henan">河南</option><option value="hubei">湖北</option><option value="hunan">湖南</option>
+                            <option value="guangdong">广东</option><option value="guangxi">广西</option><option value="hainan">海南</option>
+                            <option value="chongqing">重庆</option><option value="sichuan">四川</option><option value="guizhou">贵州</option>
+                            <option value="yunnan">云南</option><option value="xizang">西藏</option><option value="shaanxi">陕西</option>
+                            <option value="gansu">甘肃</option><option value="qinghai">青海</option><option value="ningxia">宁夏</option>
+                            <option value="xinjiang">新疆</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">高考分数（选填）</label>
+                        <input id="score" type="number" placeholder="例如：580" min="100" max="750"
+                            class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all">
+                        <p class="text-xs text-gray-400 mt-1">不填则只显示通用填报建议</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">全省位次/排名（选填）</label>
+                        <input id="rank" type="number" placeholder="例如：15000"
+                            class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all">
+                    </div>
+                </div>
+
+                <button onclick="startQuiz()" class="w-full mt-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold text-lg hover:shadow-lg transition-all hover:scale-[1.02]">
+                    开始答题
+                </button>
+            </div>
+        </div>
+
+        <!-- ========== 答题页 ========== -->
+        <div id="quiz-page" class="hidden fade-in">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="flex items-center justify-between mb-4">
+                    <button onclick="goToInfo()" class="text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        返回
+                    </button>
+                    <span class="text-sm text-gray-500">第 <span id="current-num">1</span> / <span id="total-num">60</span> 题</span>
+                </div>
+
+                <!-- 模块标签 -->
+                <div id="module-badge" class="inline-block px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 mb-4">
+                    第一部分：职业兴趣
+                </div>
+
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-8">
+                    <div id="progress-bar" class="progress-bar bg-gradient-to-r from-blue-500 to-purple-600 h-2.5 rounded-full" style="width: 1%"></div>
+                </div>
+
+                <h2 id="question-text" class="text-xl font-semibold text-gray-800 mb-8 leading-relaxed"></h2>
+
+                <div class="space-y-3">
+                    <button onclick="answer(4)" class="option-card w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-400 bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="option-emoji w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-lg">👍</div>
+                            <span class="option-label text-gray-700">非常符合</span>
+                        </div>
+                    </button>
+                    <button onclick="answer(3)" class="option-card w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-400 bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="option-emoji w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg">🙂</div>
+                            <span class="option-label text-gray-700">比较符合</span>
+                        </div>
+                    </button>
+                    <button onclick="answer(2)" class="option-card w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-400 bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="option-emoji w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-lg">😐</div>
+                            <span class="option-label text-gray-700">一般 / 不确定</span>
+                        </div>
+                    </button>
+                    <button onclick="answer(1)" class="option-card w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-400 bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="option-emoji w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-lg">😕</div>
+                            <span class="option-label text-gray-700">不太符合</span>
+                        </div>
+                    </button>
+                    <button onclick="answer(0)" class="option-card w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-400 bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="option-emoji w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-lg">👎</div>
+                            <span class="option-label text-gray-700">完全不符合</span>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="flex justify-between mt-6">
+                    <button id="prev-btn" onclick="prevQuestion()" class="px-4 py-2 text-gray-500 hover:text-gray-700 flex items-center gap-1 opacity-0 pointer-events-none transition-opacity">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        上一题
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 计算页 ========== -->
+        <div id="loading-page" class="hidden fade-in">
+            <div class="bg-white rounded-2xl shadow-xl p-12 text-center">
+                <div class="flex justify-center mb-6">
+                    <div class="spinner"></div>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-3">正在分析你的志愿方向...</h2>
+                <p class="text-gray-500 mb-8">正在整合六大测评维度，匹配最适合你的专业</p>
+                <div class="flex justify-center gap-2">
+                    <div class="pulse-dot" style="animation-delay: 0s"></div>
+                    <div class="pulse-dot" style="animation-delay: 0.2s"></div>
+                    <div class="pulse-dot" style="animation-delay: 0.4s"></div>
+                </div>
+                <div id="loading-steps" class="mt-8 space-y-2 text-sm text-gray-400">
+                    <div id="step-1">分析职业兴趣倾向...</div>
+                    <div id="step-2">评估职业价值观...</div>
+                    <div id="step-3">识别天赋优势...</div>
+                    <div id="step-4">解析行为风格...</div>
+                    <div id="step-5">匹配人格类型...</div>
+                    <div id="step-6">综合领导力特质...</div>
+                    <div id="step-7">匹配专业数据库...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 结果页 ========== -->
+        <div id="result-page" class="hidden fade-in">
+            <!-- 综合画像 -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">你的志愿测评报告</h1>
+                <p id="profile-title" class="text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold"></p>
+            </div>
+
+            <!-- 雷达图 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">六维度综合画像</h3>
+                <canvas id="radarChart"></canvas>
+            </div>
+
+            <!-- 各维度得分 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">各维度详解</h3>
+                <div id="dimension-scores" class="space-y-4"></div>
+            </div>
+
+            <!-- 学科门类推荐 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">推荐学科门类</h3>
+                <p class="text-sm text-gray-500 mb-4">点击学科卡片查看具体专业推荐</p>
+                <div id="discipline-cards" class="space-y-3"></div>
+            </div>
+
+            <!-- 冲稳保策略 -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">填报策略建议</h3>
+                <div id="strategy-section">
+                    <p id="score-display" class="text-sm text-gray-500 mb-4"></p>
+                    <div id="strategy-cards" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="flex gap-3 mb-8">
+                <button onclick="restartQuiz()" class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                    重新测评
+                </button>
+                <button onclick="shareResult()" class="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:border-gray-400 transition-all">
+                    复制结果
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+// ==================== 题目数据库 ====================
+const questionBank = [
+    // ===== 霍兰德职业兴趣（20题）=====
+    { id: 1, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'R', text: '我喜欢动手操作工具、机械或设备' },
+    { id: 2, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'R', text: '我喜欢修理家电、自行车或其他物品' },
+    { id: 3, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'R', text: '我对汽车、飞机等交通工具的原理感兴趣' },
+    { id: 4, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'I', text: '我喜欢探索事物的原理和科学规律' },
+    { id: 5, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'I', text: '我喜欢解决复杂的数学或逻辑问题' },
+    { id: 6, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'I', text: '我对医学、生物学或化学感兴趣' },
+    { id: 7, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'A', text: '我喜欢绘画、设计或视觉创作' },
+    { id: 8, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'A', text: '我喜欢有创意、不拘一格的工作' },
+    { id: 9, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'A', text: '我认为自己有想象力和艺术天赋' },
+    { id: 10, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'S', text: '我喜欢帮助他人解决问题' },
+    { id: 11, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'S', text: '我喜欢教导、培训或辅导别人' },
+    { id: 12, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'S', text: '我善于倾听并理解他人的感受' },
+    { id: 13, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'E', text: '我喜欢领导和组织团队活动' },
+    { id: 14, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'E', text: '我喜欢有挑战性的商业目标' },
+    { id: 15, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'E', text: '我有成为领导者或管理者的志向' },
+    { id: 16, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'C', text: '我喜欢有条理、井然有序的工作' },
+    { id: 17, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'C', text: '我喜欢处理数据、整理文件和记录' },
+    { id: 18, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'C', text: '我注重精确性，不喜欢出错' },
+    { id: 19, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'I', text: '我喜欢使用计算机进行编程或数据分析' },
+    { id: 20, module: 'holland', moduleName: '第一部分：职业兴趣', type: 'R', text: '我喜欢建筑、施工或制作模型' },
+
+    // ===== 职业锚（8题）=====
+    { id: 21, module: 'anchor', moduleName: '第二部分：职业价值观', type: 'autonomy', text: '我希望能自由安排工作时间和地点，不受太多约束' },
+    { id: 22, module: 'anchor', moduleName: '第二部分：职业价值观', type: 'entrepreneur', text: '我渴望有一天能创办自己的事业或公司' },
+    { id: 23, module: 'anchor', moduleName: '第二部分：职业价值观', type: 'management', text: '我希望最终能进入管理层，带领团队达成目标' },
+    { id: 24, module: 'anchor', moduleName: '第二部分：职业价值观', type: 'technical', text: '我更希望在某个专业领域不断精进，成为专家' },
+    { id: 25, module: 'anchor', moduleName: '第二部分：职业价值观', type: 'security', text: '工作的稳定性和可预测性对我来说非常重要' },
+    { id: 26, module: 'anchor', moduleName: '第二部分：职业价值观', type: 'challenge', text: '我喜欢不断接受新挑战，战胜困难让我有成就感' },
+    { id: 27, module: 'anchor', moduleName: '第二部分：职业价值观', type: 'lifestyle', text: '我希望工作与生活能良好平衡，有时间陪伴家人' },
+    { id: 28, module: 'anchor', moduleName: '第二部分：职业价值观', type: 'service', text: '我希望我的工作能直接帮助他人或对社会有贡献' },
+
+    // ===== 盖洛普优势（8题）=====
+    { id: 29, module: 'gallup', moduleName: '第三部分：天赋优势', type: 'executing', text: '我做事有条理，能按计划把目标执行到位' },
+    { id: 30, module: 'gallup', moduleName: '第三部分：天赋优势', type: 'executing', text: '即使遇到困难，我也能坚持到底完成任务' },
+    { id: 31, module: 'gallup', moduleName: '第三部分：天赋优势', type: 'influencing', text: '我善于表达观点，能说服他人接受我的想法' },
+    { id: 32, module: 'gallup', moduleName: '第三部分：天赋优势', type: 'influencing', text: '我在公众场合发言时感到自信从容' },
+    { id: 33, module: 'gallup', moduleName: '第三部分：天赋优势', type: 'relationship', text: '我很容易与人建立信任关系，朋友愿意向我倾诉' },
+    { id: 34, module: 'gallup', moduleName: '第三部分：天赋优势', type: 'relationship', text: '我喜欢促进团队合作，让每个人发挥所长' },
+    { id: 35, module: 'gallup', moduleName: '第三部分：天赋优势', type: 'thinking', text: '我喜欢分析复杂问题，找出其中的规律' },
+    { id: 36, module: 'gallup', moduleName: '第三部分：天赋优势', type: 'thinking', text: '我对学习新知识充满热情，喜欢不断充实自己' },
+
+    // ===== DISC行为风格（8题）=====
+    { id: 37, module: 'disc', moduleName: '第四部分：行为风格', type: 'D', text: '面对困难时，我倾向于快速做决定并果断行动' },
+    { id: 38, module: 'disc', moduleName: '第四部分：行为风格', type: 'D', text: '我喜欢竞争，渴望在各方面取得领先' },
+    { id: 39, module: 'disc', moduleName: '第四部分：行为风格', type: 'I', text: '我喜欢社交活动，在人群中感到精力充沛' },
+    { id: 40, module: 'disc', moduleName: '第四部分：行为风格', type: 'I', text: '我善于用幽默和热情感染周围的人' },
+    { id: 41, module: 'disc', moduleName: '第四部分：行为风格', type: 'S', text: '我性格温和，不喜欢与人发生冲突' },
+    { id: 42, module: 'disc', moduleName: '第四部分：行为风格', type: 'S', text: '我做事稳妥可靠，团队中的同事信任我' },
+    { id: 43, module: 'disc', moduleName: '第四部分：行为风格', type: 'C', text: '我做事追求完美，对细节要求很高' },
+    { id: 44, module: 'disc', moduleName: '第四部分：行为风格', type: 'C', text: '我喜欢按照既定规则和流程做事' },
+
+    // ===== MBTI人格类型（8题）=====
+    { id: 45, module: 'mbti', moduleName: '第五部分：人格类型', type: 'EI', text: '在社交场合中，我通常比较安静内敛', inverse: true }, // 答是=内向I
+    { id: 46, module: 'mbti', moduleName: '第五部分：人格类型', type: 'EI', text: '我喜欢和很多人在一起，从社交中获得能量', inverse: false }, // 答是=外向E
+    { id: 47, module: 'mbti', moduleName: '第五部分：人格类型', type: 'SN', text: '我更关注具体的事实和细节，而不是抽象的可能性', inverse: true }, // 答是=感觉S
+    { id: 48, module: 'mbti', moduleName: '第五部分：人格类型', type: 'SN', text: '我喜欢思考未来的可能性和创新的想法', inverse: false }, // 答是=直觉N
+    { id: 49, module: 'mbti', moduleName: '第五部分：人格类型', type: 'TF', text: '我做决定时更依赖逻辑分析，而非个人感受', inverse: true }, // 答是=思考T
+    { id: 50, module: 'mbti', moduleName: '第五部分：人格类型', type: 'TF', text: '我在意他人的感受，做决定时会考虑对人的影响', inverse: false }, // 答是=情感F
+    { id: 51, module: 'mbti', moduleName: '第五部分：人格类型', type: 'JP', text: '我喜欢提前计划，不喜欢临时改变安排', inverse: true }, // 答是=判断J
+    { id: 52, module: 'mbti', moduleName: '第五部分：人格类型', type: 'JP', text: '我喜欢灵活应变，保持开放的选择', inverse: false }, // 答是=知觉P
+
+    // ===== 4D领导力（8题）=====
+    { id: 53, module: '4d', moduleName: '第六部分：领导潜力', type: 'cultivating', text: '我关心他人的成长，愿意花时间指导和培养身边的人' },
+    { id: 54, module: '4d', moduleName: '第六部分：领导潜力', type: 'cultivating', text: '看到别人进步和成功，我会感到由衷的高兴' },
+    { id: 55, module: '4d', moduleName: '第六部分：领导潜力', type: 'inclusive', text: '我重视团队氛围，努力让每个人都感到被接纳' },
+    { id: 56, module: '4d', moduleName: '第六部分：领导潜力', type: 'inclusive', text: '我认为团队的成功比个人表现更重要' },
+    { id: 57, module: '4d', moduleName: '第六部分：领导潜力', type: 'visionary', text: '我善于看到事物的长远发展方向和趋势' },
+    { id: 58, module: '4d', moduleName: '第六部分：领导潜力', type: 'visionary', text: '我喜欢制定愿景并激励他人朝着共同目标努力' },
+    { id: 59, module: '4d', moduleName: '第六部分：领导潜力', type: 'directive', text: '我在混乱的环境中能迅速理清头绪，做出决策' },
+    { id: 60, module: '4d', moduleName: '第六部分：领导潜力', type: 'directive', text: '我注重结果，会推动团队按时保质完成任务' }
+];
+
+// ==================== 专业数据库 ====================
+const disciplineDB = [
+    {
+        id: 'engineering',
+        name: '工学',
+        icon: '🔧',
+        color: '#3B82F6',
+        desc: '注重实践应用和技术创新',
+        matchRules: {
+            holland: ['R','I'],
+            mbti: ['ISTJ','INTJ','ESTP','ISTP','ENTJ'],
+            disc: ['D','C'],
+            gallup: ['executing','thinking'],
+            anchor: ['technical','challenge'],
+            fourD: ['visionary','directive']
+        },
+        majors: [
+            { name: '计算机科学与技术', courses: '数据结构、算法、操作系统、计算机网络', career: '软件工程师、算法工程师、系统架构师', stars: 5 },
+            { name: '电子信息工程', courses: '电路分析、信号处理、通信原理、嵌入式系统', career: '硬件工程师、通信工程师、芯片设计', stars: 5 },
+            { name: '机械工程', courses: '机械设计、材料力学、控制工程、CAD制图', career: '机械设计师、制造工程师、设备管理', stars: 4 }
+        ]
+    },
+    {
+        id: 'medicine',
+        name: '医学',
+        icon: '🏥',
+        color: '#EF4444',
+        desc: '关注生命健康，救死扶伤',
+        matchRules: {
+            holland: ['I','S'],
+            mbti: ['ISFJ','ISTJ','INFJ','INTJ'],
+            disc: ['S','C'],
+            gallup: ['relationship','executing'],
+            anchor: ['service','technical'],
+            fourD: ['cultivating','inclusive']
+        },
+        majors: [
+            { name: '临床医学', courses: '解剖学、生理学、病理学、内科学、外科学', career: '临床医生、医学研究员', stars: 5 },
+            { name: '口腔医学', courses: '口腔解剖、牙体牙髓病学、口腔颌面外科学', career: '口腔医生、正畸专家', stars: 5 },
+            { name: '护理学', courses: '护理学基础、内科护理、外科护理、急救护理', career: '注册护士、护理管理、健康管理', stars: 4 }
+        ]
+    },
+    {
+        id: 'science',
+        name: '理学',
+        icon: '🔬',
+        color: '#8B5CF6',
+        desc: '探索自然规律，追求科学真理',
+        matchRules: {
+            holland: ['I'],
+            mbti: ['INTJ','INTP','ISTJ','INFJ'],
+            disc: ['C','S'],
+            gallup: ['thinking','executing'],
+            anchor: ['technical','autonomy'],
+            fourD: ['visionary','cultivating']
+        },
+        majors: [
+            { name: '数学与应用数学', courses: '数学分析、高等代数、概率论、数理统计', career: '数据分析师、精算师、算法研究员', stars: 5 },
+            { name: '物理学', courses: '力学、电磁学、量子力学、热力学', career: '物理研究员、半导体工程师、教师', stars: 4 },
+            { name: '生物科学', courses: '细胞生物学、遗传学、分子生物学、生态学', career: '生物研究员、基因检测、制药研发', stars: 4 }
+        ]
+    },
+    {
+        id: 'arts',
+        name: '艺术学',
+        icon: '🎨',
+        color: '#EC4899',
+        desc: '释放创造力，表达美与情感',
+        matchRules: {
+            holland: ['A'],
+            mbti: ['INFP','ENFP','ISFP','ESFP'],
+            disc: ['I','S'],
+            gallup: ['influencing','thinking'],
+            anchor: ['autonomy','challenge'],
+            fourD: ['inclusive','visionary']
+        },
+        majors: [
+            { name: '视觉传达设计', courses: '平面设计、品牌设计、UI设计、广告创意', career: '平面设计师、UI/UX设计师、创意总监', stars: 5 },
+            { name: '数字媒体艺术', courses: '影视制作、动画设计、游戏美术、交互设计', career: '动画师、游戏美术、视频剪辑', stars: 5 },
+            { name: '音乐表演', courses: '声乐/器乐训练、音乐理论、舞台表演', career: '音乐演奏家、音乐教师、录音师', stars: 4 }
+        ]
+    },
+    {
+        id: 'education',
+        name: '教育学',
+        icon: '📚',
+        color: '#10B981',
+        desc: '传道授业解惑，培养未来人才',
+        matchRules: {
+            holland: ['S','A'],
+            mbti: ['ENFJ','ESFJ','INFJ','ISFJ'],
+            disc: ['S','I'],
+            gallup: ['relationship','influencing'],
+            anchor: ['service','lifestyle'],
+            fourD: ['cultivating','inclusive']
+        },
+        majors: [
+            { name: '学前教育', courses: '儿童心理学、幼儿教育学、游戏与活动设计', career: '幼儿园教师、早教机构、儿童出版', stars: 4 },
+            { name: '汉语言文学（师范）', courses: '古代文学、现代文学、语言学、教学法', career: '中小学教师、编辑、文案策划', stars: 4 },
+            { name: '教育技术学', courses: '教学设计、多媒体技术、在线教育、AI教育', career: '教育产品经理、 instructional designer', stars: 4 }
+        ]
+    },
+    {
+        id: 'economics',
+        name: '经济学',
+        icon: '💰',
+        color: '#F59E0B',
+        desc: '洞察市场规律，驾驭财富逻辑',
+        matchRules: {
+            holland: ['E','C'],
+            mbti: ['ENTJ','ESTJ','INTJ','ISTJ'],
+            disc: ['D','C'],
+            gallup: ['thinking','influencing'],
+            anchor: ['management','challenge'],
+            fourD: ['directive','visionary']
+        },
+        majors: [
+            { name: '金融学', courses: '货币银行学、投资学、公司金融、风险管理', career: '银行家、投资分析师、基金经理', stars: 5 },
+            { name: '经济学', courses: '微观经济学、宏观经济学、计量经济学、博弈论', career: '经济分析师、政策研究员、咨询顾问', stars: 4 },
+            { name: '会计学', courses: '财务会计、管理会计、审计学、税法', career: '注册会计师、财务经理、审计师', stars: 4 }
+        ]
+    },
+    {
+        id: 'law',
+        name: '法学',
+        icon: '⚖️',
+        color: '#6366F1',
+        desc: '维护公平正义，守护社会秩序',
+        matchRules: {
+            holland: ['E','S'],
+            mbti: ['ENTJ','ESTJ','INTJ','ENFJ'],
+            disc: ['D','C'],
+            gallup: ['influencing','thinking'],
+            anchor: ['challenge','service'],
+            fourD: ['directive','inclusive']
+        },
+        majors: [
+            { name: '法学', courses: '民法、刑法、宪法、经济法、国际法', career: '律师、法官、检察官、法务', stars: 5 },
+            { name: '知识产权', courses: '专利法、商标法、著作权法、科技法', career: '知识产权律师、专利代理、企业IP管理', stars: 4 },
+            { name: '社会学', courses: '社会理论、社会调查、社会工作、城市研究', career: '社会研究员、社工、市场研究', stars: 4 }
+        ]
+    },
+    {
+        id: 'literature',
+        name: '文学',
+        icon: '✍️',
+        color: '#F97316',
+        desc: '以文字为媒，传递思想与情感',
+        matchRules: {
+            holland: ['A','S'],
+            mbti: ['INFP','ENFP','INFJ','ENFJ'],
+            disc: ['I','S'],
+            gallup: ['thinking','relationship'],
+            anchor: ['autonomy','service'],
+            fourD: ['cultivating','inclusive']
+        },
+        majors: [
+            { name: '新闻学', courses: '新闻写作、传播学、媒体伦理、数据新闻', career: '记者、编辑、新媒体运营', stars: 4 },
+            { name: '网络与新媒体', courses: '内容运营、短视频制作、社交媒体营销、数据分析', career: '新媒体运营、内容策划、自媒体', stars: 5 },
+            { name: '外语类', courses: '语言文学、翻译理论与实践、跨文化交际', career: '翻译、外贸、外交官、外企职员', stars: 4 }
+        ]
+    },
+    {
+        id: 'management',
+        name: '管理学',
+        icon: '📊',
+        color: '#14B8A6',
+        desc: '统筹资源，推动组织高效运转',
+        matchRules: {
+            holland: ['E','C'],
+            mbti: ['ENTJ','ESTJ','ENFJ','ESTP'],
+            disc: ['D','I'],
+            gallup: ['influencing','executing'],
+            anchor: ['management','challenge'],
+            fourD: ['directive','visionary']
+        },
+        majors: [
+            { name: '工商管理', courses: '战略管理、市场营销、人力资源、财务管理', career: '企业管理、咨询顾问、创业者', stars: 4 },
+            { name: '市场营销', courses: '消费者行为、品牌管理、数字营销、市场调研', career: '市场经理、品牌经理、销售总监', stars: 4 },
+            { name: '物流管理', courses: '供应链管理、仓储管理、运输管理、采购', career: '供应链经理、物流规划、电商运营', stars: 4 }
+        ]
+    },
+    {
+        id: 'agriculture',
+        name: '农学',
+        icon: '🌾',
+        color: '#65A30D',
+        desc: '耕耘土地，守护粮食与生态',
+        matchRules: {
+            holland: ['R','I'],
+            mbti: ['ISTJ','ISFJ','INTJ','ISTP'],
+            disc: ['S','C'],
+            gallup: ['executing','thinking'],
+            anchor: ['technical','service'],
+            fourD: ['cultivating','inclusive']
+        },
+        majors: [
+            { name: '农学', courses: '作物栽培、植物保护、土壤学、农业生态', career: '农业技术员、种业研发、农技推广', stars: 4 },
+            { name: '动物科学', courses: '动物营养、遗传育种、兽医基础、畜牧管理', career: '畜牧师、饲料研发、兽医助理', stars: 4 },
+            { name: '食品科学与工程', courses: '食品化学、食品工艺、食品安全、营养学', career: '食品研发、质量检测、营养师', stars: 4 }
+        ]
+    },
+    {
+        id: 'history',
+        name: '历史学',
+        icon: '🏛️',
+        color: '#78716C',
+        desc: '追溯过去，理解文明的脉络',
+        matchRules: {
+            holland: ['A','I'],
+            mbti: ['INTJ','INFJ','INFP','ISTJ'],
+            disc: ['S','C'],
+            gallup: ['thinking','relationship'],
+            anchor: ['autonomy','service'],
+            fourD: ['cultivating','visionary']
+        },
+        majors: [
+            { name: '历史学', courses: '中国史、世界史、史学理论、考古学', career: '历史教师、博物馆、考古、研究员', stars: 4 },
+            { name: '考古学', courses: '考古学通论、文物鉴定、田野考古、文化遗产', career: '考古学家、文物修复、文化遗产管理', stars: 4 }
+        ]
+    },
+    {
+        id: 'philosophy',
+        name: '哲学',
+        icon: '🤔',
+        color: '#6B7280',
+        desc: '追问本质，探索思维与存在的边界',
+        matchRules: {
+            holland: ['I','A'],
+            mbti: ['INTP','INTJ','INFJ','INFP'],
+            disc: ['C','S'],
+            gallup: ['thinking','relationship'],
+            anchor: ['autonomy','technical'],
+            fourD: ['visionary','cultivating']
+        },
+        majors: [
+            { name: '哲学', courses: '逻辑学、伦理学、形而上学、中国哲学、西方哲学', career: '哲学教师、编辑、公务员、研究员', stars: 3 },
+            { name: '逻辑学', courses: '形式逻辑、数理逻辑、批判性思维、认知科学', career: '算法工程师、数据分析师、教师', stars: 4 }
+        ]
+    }
+];
+
+// ==================== 元数据 ====================
+const dimensionMeta = {
+    holland: { name: '职业兴趣', emoji: '🔧', desc: '你倾向于什么类型的工作内容' },
+    anchor: { name: '职业价值观', emoji: '⚓', desc: '你看重什么样的职业回报' },
+    gallup: { name: '天赋优势', emoji: '💎', desc: '你天然擅长什么' },
+    disc: { name: '行为风格', emoji: '🎯', desc: '你习惯如何行动和互动' },
+    mbti: { name: '人格类型', emoji: '🧠', desc: '你认知和决策的偏好' },
+    '4d': { name: '领导潜力', emoji: '🌟', desc: '你 naturally 展现的领导特质' }
+};
+
+const hollandMeta = {
+    R: { name: '现实型', color: '#3B82F6', emoji: '🔧' },
+    I: { name: '研究型', color: '#8B5CF6', emoji: '🔬' },
+    A: { name: '艺术型', color: '#EC4899', emoji: '🎨' },
+    S: { name: '社会型', color: '#10B981', emoji: '🤝' },
+    E: { name: '企业型', color: '#F97316', emoji: '📢' },
+    C: { name: '常规型', color: '#14B8A6', emoji: '📋' }
+};
+
+const anchorMeta = {
+    autonomy: '自主型', entrepreneur: '创业型', management: '管理型',
+    technical: '技术型', security: '安全型', challenge: '挑战型',
+    lifestyle: '生活型', service: '服务型'
+};
+
+const gallupMeta = {
+    executing: '执行力', influencing: '影响力', relationship: '关系建立', thinking: '战略思维'
+};
+
+const discMeta = {
+    D: { name: '支配型', desc: '直接果断、结果导向' },
+    I: { name: '影响型', desc: '热情社交、善于表达' },
+    S: { name: '稳健型', desc: '耐心稳定、团队支持' },
+    C: { name: '谨慎型', desc: '精确严谨、追求规范' }
+};
+
+const fourDMeta = {
+    cultivating: { name: '培养型', desc: '关注人的成长' },
+    inclusive: { name: '包融型', desc: '促进团队协作' },
+    visionary: { name: '展望型', desc: '关注未来愿景' },
+    directive: { name: '指导型', desc: '注重目标结果' }
+};
+
+const profileNames = {
+    'I': { 'INTJ': '战略型研究者', 'INTP': '探索型思考者', 'INFJ': '洞察型理想家', 'INFP': '创意型梦想家' },
+    'R': { 'ISTJ': '务实型技术者', 'ISTP': '灵活型实干家', 'ISFJ': '可靠型守护者', 'ISFP': '艺术型工匠' },
+    'A': { 'ENFP': '激情型创作者', 'ENFJ': '魅力型领导者', 'ESFP': '活力型表演者', 'ESFJ': '热情型组织者' },
+    'E': { 'ENTJ': '统帅型企业家', 'ENTP': '创新型策动者', 'ESTJ': '高效型管理者', 'ESTP': '行动型冒险家' }
+};
+
+// ==================== 全局状态 ====================
+let currentQuestion = 0;
+let answers = [];
+let userInfo = {};
+let chartInstance = null;
+
+// ==================== 页面导航 ====================
+function showPage(pageId) {
+    ['welcome-page', 'info-page', 'quiz-page', 'loading-page', 'result-page'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+    });
+    document.getElementById(pageId).classList.remove('hidden');
+}
+
+function goToWelcome() { showPage('welcome-page'); }
+function goToInfo() { showPage('info-page'); }
+function goToInfo() { showPage('info-page'); }
+
+function startQuiz() {
+    const province = document.getElementById('province').value;
+    const score = document.getElementById('score').value;
+    const rank = document.getElementById('rank').value;
+
+    if (!province) {
+        alert('请选择所在省份');
+        return;
+    }
+
+    userInfo = { province, score: score ? parseInt(score) : null, rank: rank ? parseInt(rank) : null };
+    currentQuestion = 0;
+    answers = new Array(questionBank.length).fill(null);
+    showPage('quiz-page');
+    showQuestion();
+}
+
+function goToQuiz() { showPage('quiz-page'); }
+
+// ==================== 答题逻辑 ====================
+function showQuestion() {
+    const q = questionBank[currentQuestion];
+    document.getElementById('question-text').textContent = q.text;
+    document.getElementById('current-num').textContent = currentQuestion + 1;
+    document.getElementById('total-num').textContent = questionBank.length;
+
+    const progress = ((currentQuestion + 1) / questionBank.length) * 100;
+    document.getElementById('progress-bar').style.width = progress + '%';
+
+    document.getElementById('module-badge').textContent = q.moduleName;
+
+    // 清除选中状态
+    document.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
+
+    // 恢复已选答案
+    if (answers[currentQuestion] !== null) {
+        const idx = 4 - answers[currentQuestion]; // 4->0, 3->1, 2->2, 1->3, 0->4
+        document.querySelectorAll('.option-card')[idx]?.classList.add('selected');
+    }
+
+    // 上一题按钮
+    const prevBtn = document.getElementById('prev-btn');
+    if (currentQuestion > 0) {
+        prevBtn.classList.remove('opacity-0', 'pointer-events-none');
+    } else {
+        prevBtn.classList.add('opacity-0', 'pointer-events-none');
+    }
+}
+
+function answer(score) {
+    answers[currentQuestion] = score;
+
+    // 视觉反馈
+    document.querySelectorAll('.option-card').forEach((card, idx) => {
+        card.classList.remove('selected');
+        if (idx === (4 - score)) card.classList.add('selected');
+    });
+
+    // 延迟后下一题
+    setTimeout(() => {
+        currentQuestion++;
+        if (currentQuestion < questionBank.length) {
+            showQuestion();
+        } else {
+            showLoading();
+        }
+    }, 250);
+}
+
+function prevQuestion() {
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        showQuestion();
+    }
+}
+
+// ==================== 加载动画 ====================
+function showLoading() {
+    showPage('loading-page');
+
+    const steps = ['step-1','step-2','step-3','step-4','step-5','step-6','step-7'];
+    steps.forEach((id, i) => {
+        document.getElementById(id).style.opacity = '0.3';
+    });
+
+    let step = 0;
+    const interval = setInterval(() => {
+        if (step < steps.length) {
+            document.getElementById(steps[step]).style.opacity = '1';
+            document.getElementById(steps[step]).style.color = '#667eea';
+            step++;
+        } else {
+            clearInterval(interval);
+            setTimeout(() => {
+                showResult();
+            }, 500);
+        }
+    }, 400);
+}
+
+// ==================== 评分算法 ====================
+function calculateResults() {
+    // 初始化分数
+    const scores = {
+        holland: { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 },
+        anchor: { autonomy: 0, entrepreneur: 0, management: 0, technical: 0, security: 0, challenge: 0, lifestyle: 0, service: 0 },
+        gallup: { executing: 0, influencing: 0, relationship: 0, thinking: 0 },
+        disc: { D: 0, I: 0, S: 0, C: 0 },
+        mbti: { EI: 0, SN: 0, TF: 0, JP: 0 },
+        '4d': { cultivating: 0, inclusive: 0, visionary: 0, directive: 0 }
+    };
+
+    questionBank.forEach((q, idx) => {
+        const score = answers[idx];
+        if (score === null) return;
+
+        if (q.module === 'mbti') {
+            // MBTI需要处理inverse
+            const val = q.inverse ? (4 - score) : score; // inverse: 高分=该维度正向
+            scores.mbti[q.type] += val;
+        } else {
+            scores[q.module][q.type] += score;
+        }
+    });
+
+    // 霍兰德代码
+    const hollandSorted = Object.entries(scores.holland).sort((a, b) => b[1] - a[1]);
+    const hollandCode = hollandSorted.slice(0, 3).map(x => x[0]).join('');
+    const hollandTop = hollandSorted[0][0];
+
+    // 职业锚主导
+    const anchorSorted = Object.entries(scores.anchor).sort((a, b) => b[1] - a[1]);
+    const topAnchor = anchorSorted[0][0];
+
+    // 盖洛普主导
+    const gallupSorted = Object.entries(scores.gallup).sort((a, b) => b[1] - a[1]);
+    const topGallup = gallupSorted[0][0];
+
+    // DISC主导
+    const discSorted = Object.entries(scores.disc).sort((a, b) => b[1] - a[1]);
+    const topDisc = discSorted[0][0];
+
+    // MBTI类型
+    const mbti =
+        (scores.mbti.EI >= 6 ? 'E' : 'I') +
+        (scores.mbti.SN >= 6 ? 'S' : 'N') +
+        (scores.mbti.TF >= 6 ? 'T' : 'F') +
+        (scores.mbti.JP >= 6 ? 'J' : 'P');
+
+    // 4D主导
+    const fourDSorted = Object.entries(scores['4d']).sort((a, b) => b[1] - a[1]);
+    const top4D = fourDSorted[0][0];
+
+    // 计算六维度标准化得分 (0-100)
+    // 霍兰德：各类型题数不同，取得分率最高者
+    const hollandCounts = { R: 4, I: 4, A: 3, S: 3, E: 3, C: 3 };
+    const hollandRates = Object.entries(scores.holland).map(([k, v]) => v / (hollandCounts[k] * 4));
+    const hollandMaxRate = Math.max(...hollandRates);
+
+    const anchorMax = Math.max(...Object.values(scores.anchor));
+    const gallupMax = Math.max(...Object.values(scores.gallup));
+    const discMax = Math.max(...Object.values(scores.disc));
+    const fourDMax = Math.max(...Object.values(scores['4d']));
+
+    // MBTI信度：各维度分化程度
+    const mbtiConfidence = (
+        Math.abs(scores.mbti.EI - 4) / 4 +
+        Math.abs(scores.mbti.SN - 4) / 4 +
+        Math.abs(scores.mbti.TF - 4) / 4 +
+        Math.abs(scores.mbti.JP - 4) / 4
+    ) / 4 * 100;
+
+    const dimensionScores = {
+        职业兴趣: Math.round(hollandMaxRate * 100),
+        职业价值观: Math.round((anchorMax / 4) * 100),
+        天赋优势: Math.round((gallupMax / 8) * 100),
+        行为风格: Math.round((discMax / 8) * 100),
+        人格类型: Math.round(mbtiConfidence),
+        领导潜力: Math.round((fourDMax / 8) * 100)
+    };
+
+    return {
+        hollandCode, hollandTop, topAnchor, topGallup, topDisc, mbti, top4D,
+        dimensionScores, scores, hollandSorted
+    };
+}
+
+// ==================== 学科匹配算法 ====================
+function matchDisciplines(results) {
+    const { hollandTop, topAnchor, topGallup, topDisc, mbti, top4D } = results;
+
+    return disciplineDB.map(d => {
+        let match = 0;
+        const rules = d.matchRules;
+
+        // 霍兰德匹配（权重30%）
+        if (rules.holland.includes(hollandTop)) match += 30;
+        else if (rules.holland.includes(results.hollandCode[1])) match += 15;
+
+        // MBTI匹配（权重25%）
+        if (rules.mbti.includes(mbti)) match += 25;
+        else if (rules.mbti.some(t => t.slice(0,2) === mbti.slice(0,2))) match += 12;
+
+        // DISC匹配（权重15%）
+        if (rules.disc.includes(topDisc)) match += 15;
+
+        // 盖洛普匹配（权重15%）
+        if (rules.gallup.includes(topGallup)) match += 15;
+
+        // 职业锚匹配（权重10%）
+        if (rules.anchor.includes(topAnchor)) match += 10;
+
+        // 4D匹配（权重5%）
+        if (rules.fourD.includes(top4D)) match += 5;
+
+        // 基础分+随机波动（避免太多相同分数）
+        match = Math.min(98, Math.max(45, match + Math.floor(Math.random() * 6)));
+
+        return { ...d, matchScore: match };
+    }).sort((a, b) => b.matchScore - a.matchScore);
+}
+
+// ==================== 冲稳保策略 ====================
+function getStrategy(score, rank) {
+    if (!score) {
+        return {
+            rush: { level: '冲一冲', desc: '分数+20分层次的院校', examples: ['985优势专业', '顶尖211王牌专业'], color: 'red' },
+            stable: { level: '稳一稳', desc: '分数±5分层次的院校', examples: ['中档211', '省重点一本'], color: 'green' },
+            safe: { level: '保一保', desc: '分数-20分层次的院校', examples: ['普通一本', '优质二本'], color: 'blue' }
+        };
+    }
+
+    let level = '';
+    if (score >= 650) level = '顶尖段';
+    else if (score >= 600) level = '优秀段';
+    else if (score >= 550) level = '良好段';
+    else if (score >= 500) level = '中等段';
+    else level = '基础段';
+
+    const strategies = {
+        '顶尖段': {
+            rush: { level: '冲', desc: 'C9联盟、顶尖985', examples: ['清华北大优势专业', '华五院校'], color: 'red' },
+            stable: { level: '稳', desc: '中坚985、顶尖211', examples: ['中坚九校', '北邮/央财/上财'], color: 'green' },
+            safe: { level: '保', desc: '普通985、强211', examples: ['兰大/吉大', '省属211'], color: 'blue' }
+        },
+        '优秀段': {
+            rush: { level: '冲', desc: '中坚985、顶尖211', examples: ['中坚九校', '北邮/西电'], color: 'red' },
+            stable: { level: '稳', desc: '普通985、强211', examples: ['湖大/重大', '南理工/武理工'], color: 'green' },
+            safe: { level: '保', desc: '普通211、省重点', examples: ['省属211', '深大/南科大'], color: 'blue' }
+        },
+        '良好段': {
+            rush: { level: '冲', desc: '普通211、省重点', examples: ['偏远211', '深大/杭电'], color: 'red' },
+            stable: { level: '稳', desc: '省重点一本、行业强校', examples: ['各省师大/理工', '桂电/重邮'], color: 'green' },
+            safe: { level: '保', desc: '普通一本、优质二本', examples: ['地方学院', '二本龙头'], color: 'blue' }
+        },
+        '中等段': {
+            rush: { level: '冲', desc: '省重点一本', examples: ['省属重点', '行业特色校'], color: 'red' },
+            stable: { level: '稳', desc: '普通一本', examples: ['地方本科', '公办学院'], color: 'green' },
+            safe: { level: '保', desc: '二本、民办本科', examples: ['公办二本', '优质民办'], color: 'blue' }
+        },
+        '基础段': {
+            rush: { level: '冲', desc: '普通一本', examples: ['偏远公办', '中外合作'], color: 'red' },
+            stable: { level: '稳', desc: '二本院校', examples: ['公办二本', '职业本科'], color: 'green' },
+            safe: { level: '保', desc: '专科/高职', examples: ['双高计划高职', '优质专科'], color: 'blue' }
+        }
+    };
+
+    return strategies[level];
+}
+
+// ==================== 结果页渲染 ====================
+function showResult() {
+    const results = calculateResults();
+    const matchedDisciplines = matchDisciplines(results);
+    const topDisciplines = matchedDisciplines.slice(0, 5);
+
+    showPage('result-page');
+
+    // 综合画像标题
+    const profileKey = results.hollandTop;
+    const profileName = (profileNames[profileKey] && profileNames[profileKey][results.mbti]) ||
+                        (profileNames[profileKey] && profileNames[profileKey][Object.keys(profileNames[profileKey])[0]]) ||
+                        '综合型探索者';
+    document.getElementById('profile-title').textContent = `你的画像：${profileName}`;
+
+    // 雷达图
+    const ctx = document.getElementById('radarChart').getContext('2d');
+    if (chartInstance) chartInstance.destroy();
+
+    const radarLabels = ['职业兴趣', '职业价值观', '天赋优势', '行为风格', '人格类型', '领导潜力'];
+    const radarData = radarLabels.map(label => results.dimensionScores[label]);
+
+    chartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: radarLabels,
+            datasets: [{
+                label: '综合得分',
+                data: radarData,
+                backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                borderColor: 'rgba(102, 126, 234, 1)',
+                pointBackgroundColor: 'rgba(118, 75, 162, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(118, 75, 162, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: { stepSize: 20, font: { size: 10 } }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    // 各维度详解
+    const dimDiv = document.getElementById('dimension-scores');
+    dimDiv.innerHTML = '';
+
+    // 霍兰德详情
+    const hTop = results.hollandSorted[0];
+    dimDiv.innerHTML += createDimensionRow('职业兴趣', dimensionMeta.holland.emoji,
+        `${hollandMeta[hTop[0]].emoji} ${hollandMeta[hTop[0]].name}（霍兰德代码：${results.hollandCode}）`,
+        results.dimensionScores['职业兴趣'], '#3B82F6');
+
+    // 职业锚
+    dimDiv.innerHTML += createDimensionRow('职业价值观', dimensionMeta.anchor.emoji,
+        `${anchorMeta[results.topAnchor]}为主导`,
+        results.dimensionScores['职业价值观'], '#8B5CF6');
+
+    // 盖洛普
+    dimDiv.innerHTML += createDimensionRow('天赋优势', dimensionMeta.gallup.emoji,
+        `${gallupMeta[results.topGallup]}为主导`,
+        results.dimensionScores['天赋优势'], '#EC4899');
+
+    // DISC
+    dimDiv.innerHTML += createDimensionRow('行为风格', dimensionMeta.disc.emoji,
+        `${discMeta[results.topDisc].name}：${discMeta[results.topDisc].desc}`,
+        results.dimensionScores['行为风格'], '#10B981');
+
+    // MBTI
+    dimDiv.innerHTML += createDimensionRow('人格类型', dimensionMeta.mbti.emoji,
+        `${results.mbti}型`,
+        results.dimensionScores['人格类型'], '#F97316');
+
+    // 4D
+    dimDiv.innerHTML += createDimensionRow('领导潜力', dimensionMeta['4d'].emoji,
+        `${fourDMeta[results.top4D].name}：${fourDMeta[results.top4D].desc}`,
+        results.dimensionScores['领导潜力'], '#14B8A6');
+
+    // 学科推荐
+    const discDiv = document.getElementById('discipline-cards');
+    discDiv.innerHTML = '';
+    topDisciplines.forEach((d, idx) => {
+        discDiv.innerHTML += `
+            <div class="discipline-card bg-white border-2 border-gray-100 rounded-xl p-4" onclick="toggleMajors(${idx})">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl">${d.icon}</div>
+                        <div>
+                            <div class="font-bold text-gray-800">${d.name}</div>
+                            <div class="text-xs text-gray-500">${d.desc}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold" style="color:${d.color}">${d.matchScore}%</div>
+                        <div class="text-xs text-gray-400">匹配度</div>
+                    </div>
+                </div>
+                <div id="majors-${idx}" class="hidden mt-4 pt-4 border-t border-gray-100">
+                    ${d.majors.map(m => `
+                        <div class="major-item bg-gray-50 rounded-lg p-3 mb-2">
+                            <div class="font-semibold text-gray-800 mb-1">${m.name}</div>
+                            <div class="text-xs text-gray-500 mb-1">📖 ${m.courses}</div>
+                            <div class="text-xs text-gray-500 mb-1">💼 ${m.career}</div>
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs text-gray-400">就业热度：</span>
+                                ${'★'.repeat(m.stars)}${'☆'.repeat(5 - m.stars)}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="text-center mt-2">
+                    <svg id="arrow-${idx}" class="w-5 h-5 mx-auto text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        `;
+    });
+
+    // 冲稳保策略
+    const strategy = getStrategy(userInfo.score, userInfo.rank);
+    const stratDiv = document.getElementById('strategy-cards');
+    const scoreDisplay = document.getElementById('score-display');
+
+    if (userInfo.score) {
+        scoreDisplay.textContent = `基于你填写的分数：${userInfo.score}分${userInfo.rank ? '（位次约' + userInfo.rank + '）' : ''}`;
+    } else {
+        scoreDisplay.textContent = '你未填写分数，以下为通用填报策略建议';
+    }
+
+    const strategyColors = {
+        red: { bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-700', title: 'text-red-800' },
+        green: { bg: 'bg-green-50', border: 'border-green-200', badge: 'bg-green-100 text-green-700', title: 'text-green-800' },
+        blue: { bg: 'bg-blue-50', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-700', title: 'text-blue-800' }
+    };
+
+    ['rush', 'stable', 'safe'].forEach(key => {
+        const s = strategy[key];
+        const c = strategyColors[s.color];
+        stratDiv.innerHTML += `
+            <div class="strategy-card ${c.bg} border-2 ${c.border} rounded-xl p-4">
+                <div class="${c.badge} inline-block px-2 py-1 rounded-full text-xs font-bold mb-2">${s.level}</div>
+                <div class="font-bold ${c.title} mb-1">${s.desc}</div>
+                <ul class="text-sm text-gray-600 space-y-1 mt-2">
+                    ${s.examples.map(e => `<li>• ${e}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    });
+
+    // 滚动到顶部
+    window.scrollTo(0, 0);
+}
+
+function createDimensionRow(name, emoji, detail, score, color) {
+    return `
+        <div class="flex items-start gap-3">
+            <div class="text-2xl">${emoji}</div>
+            <div class="flex-1">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="font-medium text-gray-700">${name}</span>
+                    <span class="text-sm font-bold" style="color:${color}">${score}%</span>
+                </div>
+                <div class="text-sm text-gray-500 mb-1">${detail}</div>
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div class="match-bar h-full rounded-full" style="width: 0%; background-color: ${color}" data-width="${score}%"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function toggleMajors(idx) {
+    const el = document.getElementById(`majors-${idx}`);
+    const arrow = document.getElementById(`arrow-${idx}`);
+    if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+    } else {
+        el.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+    }
+}
+
+// ==================== 工具函数 ====================
+function restartQuiz() {
+    currentQuestion = 0;
+    answers = [];
+    userInfo = {};
+    document.getElementById('province').value = '';
+    document.getElementById('score').value = '';
+    document.getElementById('rank').value = '';
+    showPage('welcome-page');
+}
+
+function shareResult() {
+    const title = document.getElementById('profile-title').textContent;
+    const text = `【高考志愿综合测评结果】\n${title}\n\n快来测测你适合什么专业！`;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('结果已复制到剪贴板，快去分享吧！');
+    }).catch(() => {
+        alert('复制失败，请手动截图分享');
+    });
+}
+
+// ==================== 二维码生成 ====================
+let currentQrUrl = window.location.href;
+
+function generateQR(url) {
+    const qrDiv = document.getElementById('qrcode');
+    qrDiv.innerHTML = '';
+    const targetUrl = url || currentQrUrl;
+    new QRCode(qrDiv, {
+        text: targetUrl,
+        width: 160,
+        height: 160,
+        colorDark: '#4B5563',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+    });
+    document.getElementById('qr-url').textContent = targetUrl;
+    currentQrUrl = targetUrl;
+}
+
+function initIpSelector() {
+    const ips = window.lanIps;
+    if (!ips || ips.length === 0) return;
+
+    const selector = document.getElementById('ip-selector');
+    const buttons = document.getElementById('ip-buttons');
+    selector.classList.remove('hidden');
+
+    ips.forEach((item, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'px-3 py-1 text-xs rounded-full border transition-all ' +
+            (index === 0 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400');
+        btn.textContent = item.name + ' (' + item.ip + ')';
+        btn.onclick = () => {
+            buttons.querySelectorAll('button').forEach(b => {
+                b.className = 'px-3 py-1 text-xs rounded-full border bg-white text-gray-600 border-gray-300 hover:border-blue-400 transition-all';
+            });
+            btn.className = 'px-3 py-1 text-xs rounded-full border bg-blue-600 text-white border-blue-600 transition-all';
+            generateQR('http://' + item.ip + ':8080/gaokao.html');
+        };
+        buttons.appendChild(btn);
+    });
+
+    if (ips.length > 0) {
+        generateQR('http://' + ips[0].ip + ':8080/gaokao.html');
+    }
+}
+
+// 页面加载完成后执行动画
+window.addEventListener('load', () => {
+    initIpSelector();
+    generateQR();
+    // 结果页匹配度条动画
+    const observer = new MutationObserver(() => {
+        document.querySelectorAll('.match-bar').forEach(bar => {
+            setTimeout(() => {
+                bar.style.width = bar.dataset.width;
+            }, 300);
+        });
+    });
+    observer.observe(document.getElementById('result-page'), { attributes: true, attributeFilter: ['class'] });
+});
+</script>
+</body>
+</html>
